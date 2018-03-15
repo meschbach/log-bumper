@@ -1,0 +1,15 @@
+{
+  "name": "log-bumper",
+  "version": "1.0.0",
+  "description": "Spools logs until they can be drained into permenant storage",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "junk-drawer": "/Users/meschbach/wc/github/meschbach/js-junk-drawer",
+    "syslogd": "/Users/meschbach/wc/github/meschbach/syslogd"
+  },
+  "author": "Mark Eschbach",
+  "license": "MIT"
+}
