@@ -82,19 +82,26 @@ function tcp_incremental_send( target_port, target_host ){
 	}
 }
 
-main( async (logger) => {
-	logger.info("Log Bumper v" + version);
+if (require.main === module) {
+	main(async (logger) => {
+		logger.info("Log Bumper v" + version);
 
-	const egressPort = 8514;
-	const egressHost = "localhost";
-	const factory = tcp_incremental_send( egressPort, egressHost );
-	const exchange_point = new Bumper( factory );
+		const egressPort = 8514;
+		const egressHost = "localhost";
+		const factory = tcp_incremental_send(egressPort, egressHost);
+		const exchange_point = new Bumper(factory);
 
 
-	const ingressPort = 10105;
-	StreamService( ( frame ) => {
-		exchange_point.publish( frame );
-	},{}).listen(ingressPort, () => {
-		logger.info("Listening on ", ingressPort);
+		const ingressPort = 10105;
+		StreamService((frame) => {
+			exchange_point.publish(frame);
+		}, {}).listen(ingressPort, () => {
+			logger.info("Listening on ", ingressPort);
+		});
 	});
-});
+} else {
+	module.exports = {
+		tcp_incremental_send,
+		Bumper
+	}
+}

@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "junk-drawer": "/Users/meschbach/wc/github/meschbach/js-junk-drawer",
-    "syslogd": "/Users/meschbach/wc/github/meschbach/syslogd"
+    "junk-drawer": "git://github.com/meschbach/js-junk-drawer.git#7a3d6cb",
+    "syslogd": "git://github.com/meschbach/syslogd.git#661efb1fac98934d98e208423d64beacb3d46640"
   },
   "author": "Mark Eschbach",
   "license": "MIT"
