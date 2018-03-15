@@ -22,6 +22,9 @@ class RFC5424StructuredWriter {
 		} else {
 			const future = new Future()
 			const socket = new net.Socket();
+			socket.on('error', (problem) =>{
+				console.error("Socket error encountered", problem)
+			})
 			socket.connect( this.target_port, this.target_host, () => {
 				future.accept( socket );
 			});
