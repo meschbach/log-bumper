@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "junk-drawer": "git://github.com/meschbach/js-junk-drawer.git#7a3d6cb",
-    "syslogd": "git://github.com/meschbach/syslogd.git#661efb1fac98934d98e208423d64beacb3d46640"
+    "syslogd": "git://github.com/meschbach/syslogd.git#3ba84ee"
   },
   "author": "Mark Eschbach",
   "license": "MIT"
