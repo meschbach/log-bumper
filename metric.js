@@ -6,14 +6,18 @@ class Metric {
 		this.completed = 0;
 	}
 
+	success() {
+		this.completed++;
+		this.successes++;
+	}
+
+	failure() {
+		this.completed++;
+		this.failures++;
+	}
+
 	promise_completion( promise ){
-		promise.then( () => {
-			this.completed++;
-			this.successes++;
-		}, () => {
-			this.completed++;
-			this.failures++;
-		})
+		promise.then( () => { this.success() }, () => { this.failure() })
 	}
 }
 
