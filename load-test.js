@@ -2,7 +2,7 @@ const {main} = require('junk-drawer')
 const {version} = require('./package')
 
 const {Bumper, TCPPromisedSink} = require('./bumper')
-const {Metric, completions_per_second} = require('./metric')
+const {Metric, completions_per_n_seconds} = require('./metric')
 
 function tcp_sink( host, port ){
 	return function() {
@@ -44,7 +44,7 @@ async function run_test( logger ) {
 	logger.info("Took ", buildEnd - buildStart, "ms to build the messages")
 	logger.info("Done queuing, waiting for draining")
 	const sendStart = Date.now()
-	const stop_monitor = completions_per_second( monitor, function( last, now, delta ) {
+	const stop_monitor = completions_per_n_seconds( 3, monitor, function( last, now, delta ) {
 		console.log("Completed ", delta, " samples");
 	} );
 	const result = await Promise.all(promises)
