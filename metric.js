@@ -22,7 +22,7 @@ class Metric {
 }
 
 function completions_per_second( metric, digest ) {
-	return completions_per_n_second( 1, metric, digest );
+	return completions_per_n_seconds( 1, metric, digest );
 }
 
 function completions_per_n_seconds( count, metric, digest ) {
