@@ -65,33 +65,35 @@ class TCPPromisedSink {
  * A Bumper is a method of queuing messages to be written out to a target.
  */
 class Bumper {
-	constructor( factory ){
+	constructor( factory, logger ){
 		this.pending = [];
 		this.factory = factory;
 		this.is_consuming = false;
+		this.logger = logger;
 	}
 
 	consume(){
+		this.logger.info("Starting consumption")
 		if( this.is_consuming ) { return false; }
 		this.is_consuming = true;
 
+		this.logger.info("Internal consumption list")
 		this._consume_internal().then( (count) => {
 			this.is_consuming = false;
 		}, (error) => {
+			this.logger.error("Failed to consume messages because ", {error});
 			this.is_consuming = false;
 		})
 	}
 
 	async _consume_internal(){
+		this.logger.info("Starting consumer", {outstanding: this.pending.length, factory: this.factory });
 		const drain = this.factory()
+		this.logger.info("Drain created", drain);
 		let count = 0, last_count;
 		do {
+			this.logger.info("Consuming");
 			last_count = await this._consume_all_messages(drain);
-			var delay = new Future();
-			setTimeout( () => {
-				delay.accept();
-			}, 10);
-			await delay.promised
 			count += last_count
 		} while( last_count > 0);
 		await drain.end();
@@ -100,8 +102,11 @@ class Bumper {
 
 	async _consume_all_messages(drain) {
 		var count = 0;
+		this.logger.info("consume all", this.pending);
 		while( this.pending.length > 0){
+			this.logger.info("Consuming", {outstanding: this.pending.length });
 			await this._consume_element( drain )
+			this.logger.info("Consuming complete");
 			count++
 		}
 		return count;
