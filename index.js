@@ -3,13 +3,16 @@ const {version} = require('./package')
 const {StreamService} = require('syslogd')
 const Future = require('junk-drawer/future')
 const {Bumper} = require('./bumper')
+const EventEmitter = require('events');
 
 const net = require('net')
-class RFC5424StructuredWriter {
-	constructor( target_port, target_host ) {
+
+class RFC5424StructuredWriter extends EventEmitter {
+	constructor( target_port, target_host, logger = console) {
 		this.target_port = target_port;
 		this.target_host = target_host;
-		this.written = 0
+		this.logger = logger;
+		this.written = 0;
 	}
 
 	onConnection( frameBuilder ) {
@@ -23,9 +26,14 @@ class RFC5424StructuredWriter {
 			const future = new Future()
 			const socket = new net.Socket();
 			socket.on('error', (problem) =>{
-				console.error("Socket error encountered", problem)
+				logger.error("Socket connection error", {problem, bytesWritten: this.written});
+				this.emit("error", {socket, problem});
 			})
+			logger.info("Connecting to remote target", {host: this.target_host, port: this.target_port});
 			socket.connect( this.target_port, this.target_host, () => {
+				this.written = 0;
+				logger.info("Connected to remote target", {host: this.target_host, port: this.target_port});
+				this.emit("connected", { socket });
 				future.accept( socket );
 			});
 			this.last_op = future.promised;
@@ -35,12 +43,17 @@ class RFC5424StructuredWriter {
 
 	_scheduleAfter(socket, frameBuilder) {
 		const frame = frameBuilder();
-		this.written += frame.length
+		const length = frame.length;
+		this.written += length;
+		logger.debug("Writing bytes to socket", {length: frame.length});
 		if( socket.write(frame) ) {
+			logger.debug("Write accepted by the kernel");
 			return socket;
 		} else {
+			logger.info("Write draining.");
 			const future = new Future();
 			socket.once('drain', () => {
+				logger.info("Write drained.");
 				future.accept( socket );
 			});
 			this.last_op = frame.promised;
@@ -50,6 +63,7 @@ class RFC5424StructuredWriter {
 
 	async send_frame( frame ){
 		const write = this.onConnection( () => {
+			logger.info("Preparing the frame for write.");
 			const wireFrame = "" +frame.size + " " + frame.msg;
 			return wireFrame;
 		});
@@ -59,21 +73,23 @@ class RFC5424StructuredWriter {
 	end() {
 		const done = new Future()
 		if( this.last_op ) {
+			logger.info("Asked to terminate teh socket");
 			this.last_op.then( (socket) => {
-				console.log("Bytes written: ", this.written)
+				logger.info("Terminating the socket", {bytesWritten: this.written});
 				socket.once('close', () => { done.accept(false) });
 				socket.end()
 			})
 		} else {
+			logger.info("Socket not open or no pending writes.");
 			done.accept(true)
 		}
 		return done.promised
 	}
 }
 
-function tcp_incremental_send( target_port, target_host ){
+function tcp_incremental_send( target_port, target_host, logger = console ){
 	return function() {
-		const writer = new RFC5424StructuredWriter( target_port, target_host )
+		const writer = new RFC5424StructuredWriter( target_port, target_host, logger )
 		return {
 			end: function() {
 				return writer.end();
@@ -91,7 +107,7 @@ if (require.main === module) {
 
 		const egressPort = 8514;
 		const egressHost = "localhost";
-		const factory = tcp_incremental_send(egressPort, egressHost);
+		const factory = tcp_incremental_send(egressPort, egressHost, logger);
 		const exchange_point = new Bumper(factory);
 
 
