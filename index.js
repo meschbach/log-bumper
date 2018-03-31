@@ -65,6 +65,7 @@ class RFC5424StructuredWriter extends EventEmitter {
 		const write = this.onConnection( () => {
 			this.logger.info("Preparing the frame for write.");
 			const wireFrame = "" +frame.msg.length + " " + frame.msg;
+			this.logger.debug("Wire frame", wireFrame)
 			return wireFrame;
 		});
 		return write;
