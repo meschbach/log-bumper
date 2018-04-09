@@ -4,12 +4,15 @@
   "description": "Spools logs until they can be drained into permenant storage",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha tests"
   },
   "dependencies": {
     "junk-drawer": "git://github.com/meschbach/js-junk-drawer.git#7a3d6cb",
     "syslogd": "git://github.com/meschbach/syslogd.git#c64609a"
   },
   "author": "Mark Eschbach",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "4.0.1"
+  }
 }

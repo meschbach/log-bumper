@@ -23,7 +23,7 @@ async function run_test( logger ) {
 	const host = 'localhost';
 
 	logger.info("Targeting port ", port);
-	const buffer = new Bumper(tcp_sink( host, port));
+	const buffer = new Bumper(tcp_sink( host, port), console);
 	const promises = []
 	const monitor =  new Metric()
 	const buildStart = Date.now()

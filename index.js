@@ -64,7 +64,7 @@ class RFC5424StructuredWriter extends EventEmitter {
 	async send_frame( frame ){
 		const write = this.onConnection( () => {
 			this.logger.info("Preparing the frame for write.");
-			const wireFrame = "" +frame.msg.length + " " + frame.msg;
+			const wireFrame = "" +frame.length + " " + frame;
 			this.logger.debug("Wire frame", wireFrame)
 			return wireFrame;
 		});
@@ -88,6 +88,8 @@ class RFC5424StructuredWriter extends EventEmitter {
 	}
 }
 
+const {formatSyslogMessage} = require("./rfc5424");
+
 function tcp_incremental_send( target_port, target_host, logger = console ){
 	return function() {
 		const writer = new RFC5424StructuredWriter( target_port, target_host, logger )
@@ -95,8 +97,9 @@ function tcp_incremental_send( target_port, target_host, logger = console ){
 			end: function() {
 				return writer.end();
 			},
-			consume: function (frame) {
-				return writer.send_frame(frame);
+			consume: function (message) {
+				const frameContents = formatSyslogMessage(message);
+				return writer.send_frame(frameContents);
 			}
 		}
 	}
